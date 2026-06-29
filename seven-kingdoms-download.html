@@ -1,0 +1,380 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Download — Seven Kingdoms: Ancient Adversaries</title>
+  <style>
+    nav {
+      position: fixed; top: 0; left: 0; right: 0;
+      z-index: 100;
+      display: flex; align-items: center;
+      justify-content: space-between;
+      padding: 0.6rem 1.2rem;
+      background: rgba(10,13,26,0.97);
+      border-bottom: 1px solid rgba(201,168,76,0.18);
+      backdrop-filter: blur(4px);
+      gap: 0.5rem;
+    }
+    .nav-logo { display: flex; align-items: center; gap: 0.6rem; text-decoration: none; flex-shrink: 0; }
+    .nav-logo-text { display: flex; flex-direction: column; }
+    .nav-logo-text .line1 { font-family: Georgia, 'Times New Roman', serif; font-size: 0.78rem; font-weight: 700; color: var(--gold); letter-spacing: 0.06em; line-height: 1.1; }
+    .nav-logo-text .line3 { font-family: Georgia, 'Times New Roman', serif; font-size: 0.5rem; color: var(--gold); letter-spacing: 0.15em; text-decoration: none; opacity: 0.7; line-height: 1.4; }
+    nav ul { list-style: none; display: none; }
+    .nav-buttons { display: flex; gap: 0.5rem; align-items: center; flex-shrink: 0; margin-left: auto; }
+    nav .cta-nav { font-family: Georgia, 'Times New Roman', serif; font-size: 0.62rem; letter-spacing: 0.1em; text-transform: uppercase; color: var(--midnight); background: var(--gold); padding: 0.45rem 0.8rem; text-decoration: none; transition: background 0.25s; white-space: nowrap; }
+    nav .cta-nav:hover { background: var(--gold-light); }
+    .nav-hamburger { display: flex; background: none; border: 1px solid rgba(201,168,76,0.4); color: var(--gold); font-size: 1.1rem; width: 36px; height: 36px; cursor: pointer; align-items: center; justify-content: center; flex-shrink: 0; }
+    .nav-dropdown { display: none; position: fixed; top: 52px; left: 0; right: 0; background: rgba(10,13,26,0.98); border-bottom: 1px solid rgba(201,168,76,0.2); flex-direction: column; z-index: 99; padding: 0.5rem 0; }
+    .nav-dropdown.open { display: flex; }
+    .nav-dropdown a { font-family: Georgia, 'Times New Roman', serif; font-size: 0.72rem; letter-spacing: 0.18em; text-transform: uppercase; color: var(--parchment-dim); text-decoration: none; padding: 0.9rem 1.5rem; border-bottom: 1px solid rgba(201,168,76,0.08); transition: color 0.2s, background 0.2s; }
+    .nav-dropdown a:hover { color: var(--gold); background: rgba(201,168,76,0.05); }
+
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    :root {
+      --midnight: #0A0D1A;
+      --deep-navy: #0F1528;
+      --slate: #1C2035;
+      --smoke: #2A2D3E;
+      --gold: #C9A84C;
+      --gold-light: #E8C96A;
+      --gold-dim: #7A6030;
+      --blood: #8B1A1A;
+      --parchment: #E8D5B0;
+      --parchment-dim: #B8A580;
+      --white: #F5F0E8;
+    }
+    html { scroll-behavior: smooth; }
+    body {
+      background: var(--midnight);
+      color: var(--parchment);
+      font-family: Georgia, 'Times New Roman', serif;
+      font-size: 18px;
+      line-height: 1.7;
+      min-height: 100vh;
+    }
+
+    /* ── STARS ── */
+    #stars-canvas {
+      position: fixed; inset: 0;
+      pointer-events: none; z-index: 0; opacity: 0.4;
+    }
+
+    /* ── NAV ── */
+
+    /* ── PAGE HEADER ── */
+    .page-header {
+      text-align: center;
+      margin-bottom: 4rem;
+    }
+    .page-eyebrow {
+      font-family: Georgia, 'Times New Roman', serif; font-size: 0.65rem;
+      letter-spacing: 0.4em; text-transform: uppercase;
+      color: var(--gold-dim); margin-bottom: 0.8rem;
+    }
+    .page-header h1 {
+      font-family: Georgia, 'Times New Roman', serif;
+      font-size: clamp(1.8rem, 5vw, 3rem);
+      color: var(--gold);
+      text-shadow: 0 0 40px rgba(201,168,76,0.3);
+      line-height: 1.2; margin-bottom: 0.8rem;
+    }
+    .page-header p {
+      font-size: 1.05rem; font-style: italic;
+      color: var(--parchment-dim); max-width: 560px; margin: 0 auto;
+    }
+    .section-rule {
+      display: flex; align-items: center; gap: 0.8rem;
+      justify-content: center; margin-top: 1.2rem;
+    }
+    .section-rule::before,.section-rule::after { content:''; width:60px; height:1px; background:var(--gold-dim); }
+    .section-rule .dot { width:5px; height:5px; background:var(--gold); transform:rotate(45deg); }
+
+    /* ── VERSION CARD ── */
+    .version-card {
+      border: 1px solid rgba(201,168,76,0.25);
+      background: var(--deep-navy);
+      margin-bottom: 2rem;
+      position: relative;
+      overflow: hidden;
+    }
+    .version-card::before {
+      content: '';
+      position: absolute; top: 0; left: 0; right: 0; height: 2px;
+      background: linear-gradient(to right, transparent, var(--gold), transparent);
+    }
+    .version-header {
+      padding: 1.8rem 2rem 1.2rem;
+      border-bottom: 1px solid rgba(201,168,76,0.12);
+      display: flex; align-items: baseline; justify-content: space-between; flex-wrap: wrap; gap: 0.5rem;
+    }
+    .version-label {
+      font-family: Georgia, 'Times New Roman', serif; font-size: 1.3rem;
+      font-weight: 600; color: var(--gold); letter-spacing: 0.05em;
+    }
+    .version-date {
+      font-family: Georgia, 'Times New Roman', serif; font-size: 0.62rem;
+      letter-spacing: 0.2em; text-transform: uppercase; color: var(--gold-dim);
+    }
+    .version-latest {
+      font-family: Georgia, 'Times New Roman', serif; font-size: 0.58rem;
+      letter-spacing: 0.2em; text-transform: uppercase;
+      color: var(--midnight); background: var(--gold);
+      padding: 0.2rem 0.6rem;
+    }
+    .download-list {
+      list-style: none;
+      padding: 1.2rem 2rem;
+      display: flex; flex-direction: column; gap: 0.6rem;
+    }
+    .download-list li {
+      display: flex; align-items: center;
+      gap: 1rem; flex-wrap: wrap;
+    }
+    .dl-btn {
+      display: inline-flex; align-items: center; gap: 0.6rem;
+      font-family: Georgia, 'Times New Roman', serif; font-size: 0.7rem;
+      letter-spacing: 0.12em; text-transform: uppercase;
+      color: var(--parchment); text-decoration: none;
+      border: 1px solid rgba(201,168,76,0.3);
+      padding: 0.6rem 1.1rem;
+      background: rgba(201,168,76,0.06);
+      transition: border-color 0.2s, background 0.2s, color 0.2s;
+      flex-shrink: 0;
+    }
+    .dl-btn:hover {
+      border-color: var(--gold);
+      background: rgba(201,168,76,0.12);
+      color: var(--gold);
+    }
+    .dl-btn .icon { font-size: 1rem; }
+    .dl-hash {
+      font-family: monospace; font-size: 0.65rem;
+      color: var(--smoke); letter-spacing: 0.05em;
+      word-break: break-all;
+    }
+
+    /* ── SECTION TITLE ── */
+    .section-title {
+      font-family: Georgia, 'Times New Roman', serif; font-size: 0.65rem;
+      letter-spacing: 0.35em; text-transform: uppercase;
+      color: var(--gold-dim); margin: 3rem 0 1.2rem;
+      display: flex; align-items: center; gap: 1rem;
+    }
+    .section-title::after { content: ''; flex:1; height:1px; background: rgba(201,168,76,0.15); }
+
+    /* ── OLDER VERSIONS ── */
+    .older-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(130px, 1fr));
+      gap: 0.5rem;
+    }
+    .older-link {
+      font-family: Georgia, 'Times New Roman', serif; font-size: 0.68rem;
+      letter-spacing: 0.1em; color: var(--parchment-dim);
+      text-decoration: none;
+      border: 1px solid rgba(201,168,76,0.12);
+      padding: 0.5rem 0.8rem;
+      text-align: center;
+      background: var(--deep-navy);
+      transition: border-color 0.2s, color 0.2s;
+    }
+    .older-link:hover { border-color: var(--gold-dim); color: var(--gold); }
+
+    /* ── ALL FILES LINK ── */
+    .all-files {
+      margin-top: 1rem;
+      font-family: Georgia, 'Times New Roman', serif; font-size: 0.65rem;
+      letter-spacing: 0.2em; text-transform: uppercase;
+      color: var(--gold-dim); text-decoration: none;
+      display: inline-flex; align-items: center; gap: 0.5rem;
+      transition: color 0.2s;
+    }
+    .all-files:hover { color: var(--gold); }
+
+    /* ── FOOTER ── */
+    footer {
+      position: relative; z-index: 1;
+      padding: 2.5rem 2rem; text-align: center;
+      border-top: 1px solid rgba(201,168,76,0.12);
+    }
+    footer p { font-size: 0.85rem; color: var(--gold-dim); font-style: italic; }
+    .footer-links { display:flex; gap:2rem; justify-content:center; margin:1rem 0; flex-wrap:wrap; }
+    .footer-links a {
+      font-family:Georgia,serif; font-size:0.6rem;
+      letter-spacing:0.2em; text-transform:uppercase;
+      color:var(--parchment-dim); text-decoration:none; transition:color 0.2s;
+    }
+    .footer-links a:hover { color:var(--gold); }
+
+    /* ── REVEAL ── */
+    .reveal { opacity:0; transform:translateY(20px); transition:opacity 0.6s ease, transform 0.6s ease; }
+    .reveal.visible { opacity:1; transform:none; }
+
+    @media(max-width:600px){
+      main { padding: 7rem 1.2rem 4rem; }
+      .version-header { padding: 1.2rem 1.2rem 0.8rem; }
+      .download-list { padding: 1rem 1.2rem; }
+    }
+    @media(max-width:600px){ }
+
+  </style>
+</head>
+<body>
+
+<canvas id="stars-canvas"></canvas>
+
+<!-- NAV -->
+<nav>
+  <a class="nav-logo" href="index.html">
+    <div class="nav-logo-text">
+      <span class="line1">Seven Kingdoms</span>
+      <a href="https://7kfans.com" target="_blank" class="line3">7kfans.com</a>
+    </div>
+  </a>
+  <div class="nav-buttons">
+    <a class="cta-nav" href="seven-kingdoms-download.html">Play Free</a>
+    <button class="nav-hamburger" id="navHamburger" aria-label="Menu">&#9776;</button>
+  </div>
+  <div class="nav-dropdown" id="navDropdown">
+    <a href="seven-kingdoms-community.html">Community</a>
+    <a href="seven-kingdoms-play.html">Play Online</a>
+    <a href="seven-kingdoms-download.html">Download</a>
+    <a href="seven-kingdoms-news.html">News</a>
+    <a href="seven-kingdoms-ambition.html">Ambition</a>
+  </div>
+</nav>
+
+<main>
+
+  <!-- PAGE HEADER -->
+  <div class="page-header reveal">
+    <p class="page-eyebrow">Free &amp; Open Source</p>
+    <h1>Download the Game</h1>
+    <p>Get the latest version of Seven Kingdoms: Ancient Adversaries for Windows, Linux and macOS — and start playing with your friends (or foes).</p>
+    <div class="section-rule"><div class="dot"></div></div>
+  </div>
+
+  <!-- CURRENT VERSION -->
+  <div class="version-card reveal">
+    <div class="version-header">
+      <div style="display:flex; align-items:center; gap:0.8rem; flex-wrap:wrap;">
+        <span class="version-label">Version 2.15.7</span>
+        <span class="version-latest">Latest</span>
+      </div>
+      <span class="version-date">Released 2025-07-27</span>
+    </div>
+    <ul class="download-list">
+      <li>
+        <a class="dl-btn" href="https://sourceforge.net/projects/skfans/files/7KAA%202.15.7/7kaa-install-2.15.7-win32.exe/download" target="_blank">
+          <span class="icon">🪟</span> Windows 32-bit Installer
+        </a>
+      </li>
+      <li>
+        <a class="dl-btn" href="https://sourceforge.net/projects/skfans/files/7KAA%202.15.7/7kaa-2.15.7-linux-x86-64.tar.gz/download" target="_blank">
+          <span class="icon">🐧</span> Linux 64-bit tar.gz
+        </a>
+      </li>
+      <li>
+        <a class="dl-btn" href="https://sourceforge.net/projects/skfans/files/7KAA%202.15.7/7kaa-2.15.7.tar.gz/download" target="_blank">
+          <span class="icon">📦</span> GPL Source Code
+        </a>
+      </li>
+      <li>
+        <a class="dl-btn" href="https://www.7kfans.com/downloads/7kaa-music-2.15.zip" target="_blank">
+          <span class="icon">🎵</span> Music (Not GPL) .zip
+        </a>
+      </li>
+      <li>
+        <a class="dl-btn" href="https://www.7kfans.com/downloads/7kaa-music-2.15.tar.bz2" target="_blank">
+          <span class="icon">🎵</span> Music (Not GPL) .tar.bz2
+        </a>
+      </li>
+      <li>
+        <a class="dl-btn" href="https://sourceforge.net/projects/skfans/files/7KAA%202.15.7/7kaa-manual-2.15.7.pdf/download" target="_blank">
+          <span class="icon">📖</span> Game Manual PDF
+        </a>
+      </li>
+    </ul>
+  </div>
+
+  <!-- OLDER VERSIONS -->
+  <p class="section-title reveal">Older Versions</p>
+  <div class="older-grid reveal">
+    <a class="older-link" href="https://sourceforge.net/projects/skfans/files/7KAA%202.15.6/" target="_blank">v2.15.6</a>
+    <a class="older-link" href="https://sourceforge.net/projects/skfans/files/7KAA%202.15.5/" target="_blank">v2.15.5</a>
+    <a class="older-link" href="https://sourceforge.net/projects/skfans/files/7KAA%202.15.4p1/" target="_blank">v2.15.4p1</a>
+    <a class="older-link" href="https://sourceforge.net/projects/skfans/files/7KAA%202.15.4/" target="_blank">v2.15.4</a>
+    <a class="older-link" href="https://sourceforge.net/projects/skfans/files/7KAA%202.15.3/" target="_blank">v2.15.3</a>
+    <a class="older-link" href="https://sourceforge.net/projects/skfans/files/7KAA%202.15.2/" target="_blank">v2.15.2</a>
+    <a class="older-link" href="https://sourceforge.net/projects/skfans/files/7KAA%202.15.1/" target="_blank">v2.15.1</a>
+    <a class="older-link" href="https://sourceforge.net/projects/skfans/files/7KAA%202.15.0/" target="_blank">v2.15.0</a>
+    <a class="older-link" href="https://sourceforge.net/projects/skfans/files/7KAA%202.14.7/" target="_blank">v2.14.7</a>
+  </div>
+  <a class="all-files reveal" href="https://sourceforge.net/projects/skfans/files/" target="_blank">
+    ↗ Browse all files on SourceForge
+  </a>
+
+</main>
+
+<footer>
+  <div class="footer-links">
+    <a href="index.html">Home</a>
+    <a href="seven-kingdoms-community.html">Community</a>
+    <a href="seven-kingdoms-download.html">Download</a>
+    <a href="seven-kingdoms-play.html">Play Online</a>
+    <a href="seven-kingdoms-news.html">News</a>
+    <a href="https://7kfans.com/forums" target="_blank">Forums</a>
+  </div>
+  <p>Originally developed by Trevor Chan at Enlight Software. Now freely available and community-maintained under the GPL. This is an unofficial fan site.</p>
+</footer>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+  /* STARFIELD */
+  const canvas = document.getElementById('stars-canvas');
+  const ctx = canvas.getContext('2d');
+  let stars = [];
+  function resizeCanvas() { canvas.width = window.innerWidth; canvas.height = window.innerHeight; }
+  function initStars() {
+    stars = [];
+    for (let i = 0; i < 160; i++) {
+      stars.push({ x: Math.random()*canvas.width, y: Math.random()*canvas.height,
+        r: Math.random()*1.2+0.2, o: Math.random()*0.6+0.1, speed: Math.random()*0.3+0.05 });
+    }
+  }
+  function drawStars() {
+    ctx.clearRect(0,0,canvas.width,canvas.height);
+    stars.forEach(s => {
+      ctx.beginPath(); ctx.arc(s.x,s.y,s.r,0,Math.PI*2);
+      ctx.fillStyle = `rgba(232,213,176,${s.o})`; ctx.fill();
+      s.o += s.speed*0.02*(Math.random()>0.5?1:-1);
+      s.o = Math.max(0.05,Math.min(0.8,s.o));
+    });
+    requestAnimationFrame(drawStars);
+  }
+  resizeCanvas(); initStars(); drawStars();
+  window.addEventListener('resize',()=>{ resizeCanvas(); initStars(); });
+
+  /* SCROLL REVEAL */
+  const revealEls = document.querySelectorAll('.reveal');
+  const observer = new IntersectionObserver((entries) => {
+    entries.forEach((e, i) => {
+      if (e.isIntersecting) {
+        setTimeout(() => e.target.classList.add('visible'), i * 80);
+        observer.unobserve(e.target);
+      }
+    });
+  }, { threshold: 0.08 });
+  revealEls.forEach(el => observer.observe(el));
+  /* HAMBURGER MENU */
+  const hamburger = document.getElementById('navHamburger');
+  const dropdown = document.getElementById('navDropdown');
+  if (hamburger && dropdown) {
+    hamburger.addEventListener('click', e => { e.stopPropagation(); dropdown.classList.toggle('open'); });
+    document.addEventListener('click', () => dropdown.classList.remove('open'));
+  }
+});
+</script>
+</body>
+</html>

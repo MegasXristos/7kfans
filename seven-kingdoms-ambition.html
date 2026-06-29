@@ -1,0 +1,193 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Seven Kingdoms: Ambition — Enhanced Edition</title>
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    :root {
+      --midnight: #0A0D1A; --deep-navy: #0F1528; --slate: #1C2035;
+      --smoke: #2A2D3E; --gold: #C9A84C; --gold-light: #E8C96A;
+      --gold-dim: #7A6030; --blood: #8B1A1A; --parchment: #E8D5B0; --parchment-dim: #B8A580; --white: #F5F0E8;
+    }
+    html { scroll-behavior: smooth; }
+    body { background: var(--midnight); color: var(--parchment); font-family: Georgia, 'Times New Roman', serif; font-size: 18px; line-height: 1.7; min-height: 100vh; }
+    #stars-canvas { position: fixed; inset: 0; pointer-events: none; z-index: 0; opacity: 0.4; }
+    nav {
+      position: fixed; top: 0; left: 0; right: 0;
+      z-index: 100;
+      display: flex; align-items: center;
+      justify-content: space-between;
+      padding: 0.6rem 1.2rem;
+      background: rgba(10,13,26,0.97);
+      border-bottom: 1px solid rgba(201,168,76,0.18);
+      backdrop-filter: blur(4px);
+      gap: 0.5rem;
+    }
+    .nav-logo { display: flex; align-items: center; gap: 0.6rem; text-decoration: none; flex-shrink: 0; }
+    .nav-logo-text { display: flex; flex-direction: column; }
+    .nav-logo-text .line1 { font-family: Georgia, 'Times New Roman', serif; font-size: 0.78rem; font-weight: 700; color: var(--gold); letter-spacing: 0.06em; line-height: 1.1; }
+    .nav-logo-text .line3 { font-family: Georgia, 'Times New Roman', serif; font-size: 0.5rem; color: var(--gold); letter-spacing: 0.15em; text-decoration: none; opacity: 0.7; line-height: 1.4; }
+    nav ul { list-style: none; display: none; }
+    .nav-buttons { display: flex; gap: 0.5rem; align-items: center; flex-shrink: 0; margin-left: auto; }
+    nav .cta-nav { font-family: Georgia, 'Times New Roman', serif; font-size: 0.62rem; letter-spacing: 0.1em; text-transform: uppercase; color: var(--midnight); background: var(--gold); padding: 0.45rem 0.8rem; text-decoration: none; transition: background 0.25s; white-space: nowrap; }
+    nav .cta-nav:hover { background: var(--gold-light); }
+    .nav-hamburger { display: flex; background: none; border: 1px solid rgba(201,168,76,0.4); color: var(--gold); font-size: 1.1rem; width: 36px; height: 36px; cursor: pointer; align-items: center; justify-content: center; flex-shrink: 0; }
+    .nav-dropdown { display: none; position: fixed; top: 52px; left: 0; right: 0; background: rgba(10,13,26,0.98); border-bottom: 1px solid rgba(201,168,76,0.2); flex-direction: column; z-index: 99; padding: 0.5rem 0; }
+    .nav-dropdown.open { display: flex; }
+    .nav-dropdown a { font-family: Georgia, 'Times New Roman', serif; font-size: 0.72rem; letter-spacing: 0.18em; text-transform: uppercase; color: var(--parchment-dim); text-decoration: none; padding: 0.9rem 1.5rem; border-bottom: 1px solid rgba(201,168,76,0.08); transition: color 0.2s, background 0.2s; }
+    .nav-dropdown a:hover { color: var(--gold); background: rgba(201,168,76,0.05); }
+    main { position: relative; z-index: 1; max-width: 860px; margin: 0 auto; padding: 8rem 2rem 6rem; }
+    .page-header { text-align: center; margin-bottom: 3.5rem; }
+    .page-eyebrow { font-family: Georgia, 'Times New Roman', serif; font-size: 0.65rem; letter-spacing: 0.4em; text-transform: uppercase; color: var(--gold-dim); margin-bottom: 0.8rem; }
+    .page-header h1 { font-family: Georgia, 'Times New Roman', serif; font-size: clamp(1.8rem, 5vw, 3rem); color: var(--gold); text-shadow: 0 0 40px rgba(201,168,76,0.3); line-height: 1.2; margin-bottom: 0.8rem; }
+    .page-header p { font-size: 1.05rem; font-style: italic; color: var(--parchment-dim); max-width: 600px; margin: 0 auto; }
+    .section-rule { display: flex; align-items: center; gap: 0.8rem; justify-content: center; margin-top: 1.2rem; }
+    .section-rule::before,.section-rule::after { content:''; width:60px; height:1px; background:var(--gold-dim); }
+    .section-rule .dot { width:5px; height:5px; background:var(--gold); transform:rotate(45deg); }
+    .content-card { border: 1px solid rgba(201,168,76,0.2); background: var(--deep-navy); margin-bottom: 1.5rem; position: relative; overflow: hidden; }
+    .content-card::before { content: ''; position: absolute; top: 0; left: 0; right: 0; height: 2px; background: linear-gradient(to right, transparent, var(--gold), transparent); }
+    .card-header { padding: 1.5rem 2rem 1rem; display: flex; align-items: center; gap: 1rem; border-bottom: 1px solid rgba(201,168,76,0.1); }
+    .card-icon { font-size: 1.8rem; flex-shrink: 0; }
+    .card-header h2 { font-family: Georgia, 'Times New Roman', serif; font-size: 1.1rem; font-weight: 600; color: var(--gold); letter-spacing: 0.05em; }
+    .card-body { padding: 1.5rem 2rem; }
+    .card-body p { font-size: 1rem; color: var(--parchment-dim); line-height: 1.8; margin-bottom: 1rem; }
+    .card-body p:last-child { margin-bottom: 0; }
+    .card-body p strong { color: var(--parchment); }
+    .feature-list { list-style: none; display: flex; flex-direction: column; gap: 0.6rem; }
+    .feature-list li { display: flex; gap: 0.8rem; align-items: flex-start; font-size: 0.97rem; color: var(--parchment-dim); line-height: 1.6; }
+    .feature-list li::before { content: '✦'; color: var(--gold); font-size: 0.65rem; margin-top: 0.4rem; flex-shrink: 0; }
+    .btn-row { display: flex; gap: 1rem; flex-wrap: wrap; margin-top: 0.5rem; }
+    .btn-gold { display: inline-flex; align-items: center; gap: 0.6rem; font-family: Georgia, 'Times New Roman', serif; font-size: 0.72rem; letter-spacing: 0.15em; text-transform: uppercase; color: var(--midnight); background: linear-gradient(135deg, var(--gold) 0%, var(--gold-light) 100%); padding: 0.9rem 1.8rem; text-decoration: none; transition: box-shadow 0.2s, transform 0.2s; box-shadow: 0 4px 20px rgba(201,168,76,0.25); }
+    .btn-gold:hover { transform: translateY(-2px); box-shadow: 0 8px 30px rgba(201,168,76,0.4); }
+    .btn-outline { display: inline-flex; align-items: center; gap: 0.6rem; font-family: Georgia, 'Times New Roman', serif; font-size: 0.72rem; letter-spacing: 0.15em; text-transform: uppercase; color: var(--gold); background: transparent; padding: 0.9rem 1.8rem; text-decoration: none; border: 1px solid rgba(201,168,76,0.4); transition: border-color 0.2s, background 0.2s; }
+    .btn-outline:hover { border-color: var(--gold); background: rgba(201,168,76,0.07); }
+    .version-tag { display: inline-block; font-family: Georgia, 'Times New Roman', serif; font-size: 0.58rem; letter-spacing: 0.2em; text-transform: uppercase; color: var(--midnight); background: var(--gold); padding: 0.2rem 0.6rem; margin-left: 0.5rem; }
+    .info-banner { border: 1px solid rgba(139,26,26,0.4); background: linear-gradient(135deg, rgba(139,26,26,0.08) 0%, rgba(201,168,76,0.04) 100%); padding: 1.2rem 1.5rem; margin-bottom: 1.5rem; font-size: 0.92rem; color: var(--parchment-dim); line-height: 1.7; }
+    .info-banner strong { color: var(--gold); }
+    footer { position: relative; z-index: 1; padding: 2.5rem 2rem; text-align: center; border-top: 1px solid rgba(201,168,76,0.12); }
+    footer p { font-size: 0.85rem; color: var(--gold-dim); font-style: italic; }
+    .footer-links { display:flex; gap:2rem; justify-content:center; margin:1rem 0; flex-wrap:wrap; }
+    .footer-links a { font-family:Georgia,serif; font-size:0.6rem; letter-spacing:0.2em; text-transform:uppercase; color:var(--parchment-dim); text-decoration:none; transition:color 0.2s; }
+    .footer-links a:hover { color:var(--gold); }
+    .reveal { opacity:0; transform:translateY(20px); transition:opacity 0.6s ease, transform 0.6s ease; }
+    .reveal.visible { opacity:1; transform:none; }
+    @media(max-width:600px){ main { padding: 7rem 1.2rem 4rem; } .card-header, .card-body { padding: 1.2rem; } }
+  </style>
+</head>
+<body>
+<canvas id="stars-canvas"></canvas>
+<nav>
+  <a class="nav-logo" href="index.html">
+    <div class="nav-logo-text">
+      <span class="line1">Seven Kingdoms</span>
+      <a href="https://7kfans.com" target="_blank" class="line3">7kfans.com</a>
+    </div>
+  </a>
+  <div class="nav-buttons">
+    <a class="cta-nav" href="seven-kingdoms-download.html">Play Free</a>
+    <button class="nav-hamburger" id="navHamburger" aria-label="Menu">&#9776;</button>
+  </div>
+  <div class="nav-dropdown" id="navDropdown">
+    <a href="seven-kingdoms-community.html">Community</a>
+    <a href="seven-kingdoms-play.html">Play Online</a>
+    <a href="seven-kingdoms-download.html">Download</a>
+    <a href="seven-kingdoms-news.html">News</a>
+    <a href="seven-kingdoms-ambition.html">Ambition</a>
+  </div>
+</nav>
+<main>
+  <div class="page-header reveal">
+    <p class="page-eyebrow">A Community Fork</p>
+    <h1>Seven Kingdoms: Ambition</h1>
+    <p>An updated and enhanced version of Seven Kingdoms: Ancient Adversaries — with numerous fixes, quality-of-life improvements and new features.</p>
+    <div class="section-rule"><div class="dot"></div></div>
+  </div>
+
+  <div class="info-banner reveal">
+    <strong>Note:</strong> Ambition is a separate project from the main 7KAA game. It builds on the same foundation but adds its own enhancements. It is maintained independently on SourceForge.
+  </div>
+
+  <div class="content-card reveal">
+    <div class="card-header"><div class="card-icon">⚔️</div><h2>What is Ambition?</h2></div>
+    <div class="card-body">
+      <p>Seven Kingdoms: Ambition is a real-time game of epic strategy and empire building featuring economy management, warfare, and intrigue. It is an <strong>enhanced fork of 7KAA</strong> with numerous fixes and improvements.</p>
+      <p>Begin with a single modest village and an entire world to conquer — by force of arms, guile, persuasion, or whatever means you choose. Wage war, forge alliances, send spies, manage trade, research technology, or seek the ultimate power: the aid of the gods.</p>
+    </div>
+  </div>
+
+  <div class="content-card reveal">
+    <div class="card-header"><div class="card-icon">✨</div><h2>Enhancements Over 7KAA</h2></div>
+    <div class="card-body">
+      <ul class="feature-list">
+        <li>Scrolling with mouse wheel, touchpad, and keyboard keys in Kingdom, Village, Economy and Trade panels</li>
+        <li>Unlimited production queues for War Factories and Harbours</li>
+        <li>Production queue size shown over the production button</li>
+        <li>War machine type and level displayed inside forts for easy identification</li>
+        <li>Command-range indicators for units outside their general's range</li>
+        <li>Unit leadership effect status shown in the info pane</li>
+        <li>Many UI fixes and refinements to info panels and labels</li>
+        <li>Stays compatible with 7KAA releases (latest merges in 2.15.7 changes)</li>
+      </ul>
+    </div>
+  </div>
+
+  <div class="content-card reveal">
+    <div class="card-header"><div class="card-icon">⬇️</div><h2>Download <span class="version-tag">v3.2.0</span></h2></div>
+    <div class="card-body">
+      <p>Available for Windows, Linux (including Debian packages) and as source code. Music can be downloaded separately and placed into the game's data directory.</p>
+      <div class="btn-row">
+        <a class="btn-gold" href="https://sourceforge.net/projects/seven-kingdoms-ambition/files/" target="_blank">Download on SourceForge ↗</a>
+        <a class="btn-outline" href="https://sourceforge.net/p/seven-kingdoms-ambition/wiki/Features/" target="_blank">Full Feature List ↗</a>
+      </div>
+    </div>
+  </div>
+
+  <div class="content-card reveal">
+    <div class="card-header"><div class="card-icon">💬</div><h2>Community &amp; Source</h2></div>
+    <div class="card-body">
+      <p>Ambition has its own Discord and development resources. Join the community to get involved, report bugs, or contribute.</p>
+      <div class="btn-row">
+        <a class="btn-outline" href="https://sourceforge.net/projects/seven-kingdoms-ambition/" target="_blank">Project Page ↗</a>
+        <a class="btn-outline" href="https://discord.gg/xJs99xK38G" target="_blank">Discord ↗</a>
+      </div>
+    </div>
+  </div>
+</main>
+
+<footer>
+  <div class="footer-links">
+    <a href="index.html">Home</a>
+    <a href="seven-kingdoms-community.html">Community</a>
+    <a href="seven-kingdoms-download.html">Download</a>
+    <a href="seven-kingdoms-play.html">Play Online</a>
+    <a href="seven-kingdoms-news.html">News</a>
+    <a href="https://7kfans.com/forums" target="_blank">Forums</a>
+  </div>
+  <p>Seven Kingdoms: Ambition is an independent community fork. Originally based on Seven Kingdoms: Ancient Adversaries by Trevor Chan / Enlight Software, available under the GPL. This is an unofficial fan site.</p>
+</footer>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+  const canvas = document.getElementById('stars-canvas');
+  const ctx = canvas.getContext('2d');
+  let stars = [];
+  function resizeCanvas() { canvas.width = window.innerWidth; canvas.height = window.innerHeight; }
+  function initStars() { stars = []; for (let i = 0; i < 160; i++) { stars.push({ x: Math.random()*canvas.width, y: Math.random()*canvas.height, r: Math.random()*1.2+0.2, o: Math.random()*0.6+0.1, speed: Math.random()*0.3+0.05 }); } }
+  function drawStars() { ctx.clearRect(0,0,canvas.width,canvas.height); stars.forEach(s => { ctx.beginPath(); ctx.arc(s.x,s.y,s.r,0,Math.PI*2); ctx.fillStyle=`rgba(232,213,176,${s.o})`; ctx.fill(); s.o+=s.speed*0.02*(Math.random()>0.5?1:-1); s.o=Math.max(0.05,Math.min(0.8,s.o)); }); requestAnimationFrame(drawStars); }
+  resizeCanvas(); initStars(); drawStars();
+  window.addEventListener('resize',()=>{ resizeCanvas(); initStars(); });
+  const obs = new IntersectionObserver((entries) => { entries.forEach((e,i) => { if(e.isIntersecting){ setTimeout(()=>e.target.classList.add('visible'),i*100); obs.unobserve(e.target); } }); }, {threshold:0.08});
+  document.querySelectorAll('.reveal').forEach(el => obs.observe(el));
+  /* HAMBURGER MENU */
+  const hamburger = document.getElementById('navHamburger');
+  const dropdown = document.getElementById('navDropdown');
+  if (hamburger && dropdown) {
+    hamburger.addEventListener('click', e => { e.stopPropagation(); dropdown.classList.toggle('open'); });
+    document.addEventListener('click', () => dropdown.classList.remove('open'));
+  }
+});
+</script>
+</body>
+</html>

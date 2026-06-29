@@ -1,0 +1,407 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Play Online — Seven Kingdoms: Ancient Adversaries</title>
+  <style>
+    nav {
+      position: fixed; top: 0; left: 0; right: 0;
+      z-index: 100;
+      display: flex; align-items: center;
+      justify-content: space-between;
+      padding: 0.6rem 1.2rem;
+      background: rgba(10,13,26,0.97);
+      border-bottom: 1px solid rgba(201,168,76,0.18);
+      backdrop-filter: blur(4px);
+      gap: 0.5rem;
+    }
+    .nav-logo { display: flex; align-items: center; gap: 0.6rem; text-decoration: none; flex-shrink: 0; }
+    .nav-logo-text { display: flex; flex-direction: column; }
+    .nav-logo-text .line1 { font-family: Georgia, 'Times New Roman', serif; font-size: 0.78rem; font-weight: 700; color: var(--gold); letter-spacing: 0.06em; line-height: 1.1; }
+    .nav-logo-text .line3 { font-family: Georgia, 'Times New Roman', serif; font-size: 0.5rem; color: var(--gold); letter-spacing: 0.15em; text-decoration: none; opacity: 0.7; line-height: 1.4; }
+    nav ul { list-style: none; display: none; }
+    .nav-buttons { display: flex; gap: 0.5rem; align-items: center; flex-shrink: 0; margin-left: auto; }
+    nav .cta-nav { font-family: Georgia, 'Times New Roman', serif; font-size: 0.62rem; letter-spacing: 0.1em; text-transform: uppercase; color: var(--midnight); background: var(--gold); padding: 0.45rem 0.8rem; text-decoration: none; transition: background 0.25s; white-space: nowrap; }
+    nav .cta-nav:hover { background: var(--gold-light); }
+    .nav-hamburger { display: flex; background: none; border: 1px solid rgba(201,168,76,0.4); color: var(--gold); font-size: 1.1rem; width: 36px; height: 36px; cursor: pointer; align-items: center; justify-content: center; flex-shrink: 0; }
+    .nav-dropdown { display: none; position: fixed; top: 52px; left: 0; right: 0; background: rgba(10,13,26,0.98); border-bottom: 1px solid rgba(201,168,76,0.2); flex-direction: column; z-index: 99; padding: 0.5rem 0; }
+    .nav-dropdown.open { display: flex; }
+    .nav-dropdown a { font-family: Georgia, 'Times New Roman', serif; font-size: 0.72rem; letter-spacing: 0.18em; text-transform: uppercase; color: var(--parchment-dim); text-decoration: none; padding: 0.9rem 1.5rem; border-bottom: 1px solid rgba(201,168,76,0.08); transition: color 0.2s, background 0.2s; }
+    .nav-dropdown a:hover { color: var(--gold); background: rgba(201,168,76,0.05); }
+
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    :root {
+      --midnight: #0A0D1A;
+      --deep-navy: #0F1528;
+      --slate: #1C2035;
+      --smoke: #2A2D3E;
+      --gold: #C9A84C;
+      --gold-light: #E8C96A;
+      --gold-dim: #7A6030;
+      --parchment: #E8D5B0;
+      --parchment-dim: #B8A580;
+      --white: #F5F0E8;
+    }
+    html { scroll-behavior: smooth; }
+    body {
+      background: var(--midnight);
+      color: var(--parchment);
+      font-family: Georgia, 'Times New Roman', serif;
+      font-size: 18px;
+      line-height: 1.7;
+      min-height: 100vh;
+    }
+
+    /* ── STARS ── */
+    #stars-canvas {
+      position: fixed; inset: 0;
+      pointer-events: none; z-index: 0; opacity: 0.4;
+    }
+
+    /* ── NAV ── */
+
+    /* ── PAGE HEADER ── */
+    .page-header { text-align: center; margin-bottom: 4rem; }
+    .page-eyebrow {
+      font-family: Georgia, 'Times New Roman', serif; font-size: 0.65rem;
+      letter-spacing: 0.4em; text-transform: uppercase;
+      color: var(--gold-dim); margin-bottom: 0.8rem;
+    }
+    .page-header h1 {
+      font-family: Georgia, 'Times New Roman', serif;
+      font-size: clamp(1.8rem, 5vw, 3rem);
+      color: var(--gold);
+      text-shadow: 0 0 40px rgba(201,168,76,0.3);
+      line-height: 1.2; margin-bottom: 0.8rem;
+    }
+    .page-header p {
+      font-size: 1.05rem; font-style: italic;
+      color: var(--parchment-dim); max-width: 560px; margin: 0 auto;
+    }
+    .section-rule {
+      display: flex; align-items: center; gap: 0.8rem;
+      justify-content: center; margin-top: 1.2rem;
+    }
+    .section-rule::before,.section-rule::after { content:''; width:60px; height:1px; background:var(--gold-dim); }
+    .section-rule .dot { width:5px; height:5px; background:var(--gold); transform:rotate(45deg); }
+
+    /* ── CONTENT CARDS ── */
+    .content-card {
+      border: 1px solid rgba(201,168,76,0.2);
+      background: var(--deep-navy);
+      margin-bottom: 1.5rem;
+      position: relative;
+      overflow: hidden;
+    }
+    .content-card::before {
+      content: '';
+      position: absolute; top: 0; left: 0; right: 0; height: 2px;
+      background: linear-gradient(to right, transparent, var(--gold), transparent);
+    }
+    .card-header {
+      padding: 1.5rem 2rem 1rem;
+      display: flex; align-items: center; gap: 1rem;
+      border-bottom: 1px solid rgba(201,168,76,0.1);
+    }
+    .card-icon { font-size: 1.8rem; flex-shrink: 0; }
+    .card-header h2 {
+      font-family: Georgia, 'Times New Roman', serif; font-size: 1.1rem;
+      font-weight: 600; color: var(--gold); letter-spacing: 0.05em;
+    }
+    .card-body {
+      padding: 1.5rem 2rem;
+      display: flex; flex-direction: column; gap: 1rem;
+    }
+    .card-body p {
+      font-size: 1rem; color: var(--parchment-dim); line-height: 1.8;
+    }
+    .card-body p strong {
+      color: var(--parchment); font-weight: 600;
+    }
+
+    /* ── STEPS ── */
+    .steps { display: flex; flex-direction: column; gap: 0.8rem; }
+    .step {
+      display: flex; gap: 1rem; align-items: flex-start;
+      padding: 1rem 1.2rem;
+      border: 1px solid rgba(201,168,76,0.1);
+      background: rgba(201,168,76,0.03);
+    }
+    .step-num {
+      font-family: Georgia, 'Times New Roman', serif; font-size: 0.8rem;
+      font-weight: 900; color: var(--gold);
+      width: 28px; flex-shrink: 0; line-height: 1.6;
+    }
+    .step-text { font-size: 0.95rem; color: var(--parchment-dim); line-height: 1.7; }
+    .step-text a {
+      color: var(--gold); text-decoration: none; border-bottom: 1px solid rgba(201,168,76,0.3);
+      transition: border-color 0.2s;
+    }
+    .step-text a:hover { border-color: var(--gold); }
+
+    /* ── INFO GRID ── */
+    .info-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+      gap: 1px;
+      background: rgba(201,168,76,0.12);
+      margin-top: 0.5rem;
+    }
+    .info-cell {
+      background: var(--midnight);
+      padding: 1rem 1.2rem;
+    }
+    .info-label {
+      font-family: Georgia, 'Times New Roman', serif; font-size: 0.58rem;
+      letter-spacing: 0.25em; text-transform: uppercase;
+      color: var(--gold-dim); margin-bottom: 0.3rem;
+    }
+    .info-value {
+      font-family: Georgia, 'Times New Roman', serif; font-size: 0.9rem;
+      color: var(--parchment);
+    }
+
+    /* ── CTA BUTTON ── */
+    .btn-gold {
+      display: inline-flex; align-items: center; gap: 0.6rem;
+      font-family: Georgia, 'Times New Roman', serif; font-size: 0.72rem;
+      letter-spacing: 0.15em; text-transform: uppercase;
+      color: var(--midnight);
+      background: linear-gradient(135deg, var(--gold) 0%, var(--gold-light) 100%);
+      padding: 0.9rem 1.8rem; text-decoration: none;
+      transition: box-shadow 0.2s, transform 0.2s;
+      box-shadow: 0 4px 20px rgba(201,168,76,0.25);
+    }
+    .btn-gold:hover { transform: translateY(-2px); box-shadow: 0 8px 30px rgba(201,168,76,0.4); }
+    .btn-outline {
+      display: inline-flex; align-items: center; gap: 0.6rem;
+      font-family: Georgia, 'Times New Roman', serif; font-size: 0.72rem;
+      letter-spacing: 0.15em; text-transform: uppercase;
+      color: var(--gold); background: transparent;
+      padding: 0.9rem 1.8rem; text-decoration: none;
+      border: 1px solid rgba(201,168,76,0.4);
+      transition: border-color 0.2s, background 0.2s;
+    }
+    .btn-outline:hover { border-color: var(--gold); background: rgba(201,168,76,0.07); }
+    .btn-row {
+      display: flex; gap: 1rem; flex-wrap: wrap;
+      margin-top: 0.5rem;
+    }
+
+    /* ── FOOTER ── */
+    footer {
+      position: relative; z-index: 1;
+      padding: 2.5rem 2rem; text-align: center;
+      border-top: 1px solid rgba(201,168,76,0.12);
+    }
+    footer p { font-size: 0.85rem; color: var(--gold-dim); font-style: italic; }
+    .footer-links { display:flex; gap:2rem; justify-content:center; margin:1rem 0; flex-wrap:wrap; }
+    .footer-links a {
+      font-family:Georgia,serif; font-size:0.6rem;
+      letter-spacing:0.2em; text-transform:uppercase;
+      color:var(--parchment-dim); text-decoration:none; transition:color 0.2s;
+    }
+    .footer-links a:hover { color:var(--gold); }
+
+    /* ── REVEAL ── */
+    .reveal { opacity:0; transform:translateY(20px); transition:opacity 0.6s ease, transform 0.6s ease; }
+    .reveal.visible { opacity:1; transform:none; }
+
+    @media(max-width:600px){
+      main { padding: 7rem 1.2rem 4rem; }
+      .card-header { padding: 1.2rem 1.2rem 0.8rem; }
+      .card-body { padding: 1rem 1.2rem; }
+    }
+    @media(max-width:600px){ }
+
+  </style>
+</head>
+<body>
+
+<canvas id="stars-canvas"></canvas>
+
+<!-- NAV -->
+<nav>
+  <a class="nav-logo" href="index.html">
+    <div class="nav-logo-text">
+      <span class="line1">Seven Kingdoms</span>
+      <a href="https://7kfans.com" target="_blank" class="line3">7kfans.com</a>
+    </div>
+  </a>
+  <div class="nav-buttons">
+    <a class="cta-nav" href="seven-kingdoms-download.html">Play Free</a>
+    <button class="nav-hamburger" id="navHamburger" aria-label="Menu">&#9776;</button>
+  </div>
+  <div class="nav-dropdown" id="navDropdown">
+    <a href="seven-kingdoms-community.html">Community</a>
+    <a href="seven-kingdoms-play.html">Play Online</a>
+    <a href="seven-kingdoms-download.html">Download</a>
+    <a href="seven-kingdoms-news.html">News</a>
+    <a href="seven-kingdoms-ambition.html">Ambition</a>
+  </div>
+</nav>
+
+<main>
+
+  <!-- PAGE HEADER -->
+  <div class="page-header reveal">
+    <p class="page-eyebrow">Up to 7 Players</p>
+    <h1>Play Online</h1>
+    <p>Test your skill against other rulers from around the world. Seven Kingdoms comes alive in multiplayer — alliances, betrayal, and war on a grand scale.</p>
+    <div class="section-rule"><div class="dot"></div></div>
+  </div>
+
+  <!-- WITH YOUR FRIENDS -->
+  <div class="content-card reveal">
+    <div class="card-header">
+      <div class="card-icon">⚔️</div>
+      <h2>Play With Your Friends</h2>
+    </div>
+    <div class="card-body">
+      <p>The game supports up to <strong>7 players</strong> over the internet. Your most memorable moments will come from playing against real opponents.</p>
+      <div class="steps">
+        <div class="step">
+          <span class="step-num">1</span>
+          <span class="step-text">Download and install the <strong>latest version</strong> of the game. Old 2.0 versions from the 90s had desync issues and are no longer used. All players must use the same version.</span>
+        </div>
+        <div class="step">
+          <span class="step-num">2</span>
+          <span class="step-text">Register a <a href="https://www.7kfans.com/forums/" target="_blank">forum account on 7kfans.com</a>. This lets you list your game so others can find and join it.</span>
+        </div>
+        <div class="step">
+          <span class="step-num">3</span>
+          <span class="step-text">Launch the game, create a new match and select <strong>7kfans.com</strong> as your service. This enables automatic NAT traversal — you can play even behind a firewall without port forwarding.</span>
+        </div>
+        <div class="step">
+          <span class="step-num">4</span>
+          <span class="step-text">Find opponents in the <a href="https://www.7kfans.com/forums/" target="_blank">forums</a> or community channels. There is an active community of players eager to play.</span>
+        </div>
+      </div>
+      <div class="btn-row">
+        <a class="btn-gold" href="seven-kingdoms-download.html">Download the Game</a>
+        <a class="btn-outline" href="https://www.7kfans.com/forums/" target="_blank">Visit the Forums ↗</a>
+      </div>
+    </div>
+  </div>
+
+  <!-- OTHER WAYS -->
+  <div class="content-card reveal">
+    <div class="card-header">
+      <div class="card-icon">🌐</div>
+      <h2>Other Ways to Connect</h2>
+    </div>
+    <div class="card-body">
+      <p>Beyond 7kfans.com, the game also supports <strong>LAN</strong> and <strong>direct connect</strong>. These work well for private matches or when using VPN software.</p>
+      <p>Note: VPN software does <strong>not</strong> fix issues when playing over the open internet — use 7kfans.com for that.</p>
+    </div>
+  </div>
+
+  <!-- TROUBLESHOOTING -->
+  <div class="content-card reveal">
+    <div class="card-header">
+      <div class="card-icon">🔧</div>
+      <h2>Troubleshooting</h2>
+    </div>
+    <div class="card-body">
+      <p>Most connection issues come from overly strict firewall settings. Allow <strong>7kaa.exe</strong> through your firewall and make sure traffic on the following ports is not blocked:</p>
+      <div class="info-grid">
+        <div class="info-cell">
+          <div class="info-label">UDP Port 1</div>
+          <div class="info-value">19255</div>
+        </div>
+        <div class="info-cell">
+          <div class="info-label">UDP Port 2</div>
+          <div class="info-value">19383</div>
+        </div>
+        <div class="info-cell">
+          <div class="info-label">Port Forwarding</div>
+          <div class="info-value">Not required</div>
+        </div>
+        <div class="info-cell">
+          <div class="info-label">Max Latency</div>
+          <div class="info-value">500 ms</div>
+        </div>
+      </div>
+      <p>The ports may shift if already in use. Note that guides written before version 2.15 use different port numbers and no longer apply.</p>
+      <p>As a peer-to-peer game, the max latency between players for smooth gameplay is <strong>500 ms</strong>. Connection speed does not matter on modern broadband.</p>
+    </div>
+  </div>
+
+  <!-- GET THE CODE -->
+  <div class="content-card reveal">
+    <div class="card-header">
+      <div class="card-icon">💻</div>
+      <h2>Get the Source Code</h2>
+    </div>
+    <div class="card-body">
+      <p>Seven Kingdoms is fully open source under the GPL. Explore the code, contribute, or just see what is behind the scenes.</p>
+      <div class="btn-row">
+        <a class="btn-outline" href="https://github.com/the3dfxdude/7kaa" target="_blank">↗ View on GitHub</a>
+      </div>
+    </div>
+  </div>
+
+</main>
+
+<footer>
+  <div class="footer-links">
+    <a href="index.html">Home</a>
+    <a href="seven-kingdoms-community.html">Community</a>
+    <a href="seven-kingdoms-download.html">Download</a>
+    <a href="seven-kingdoms-play.html">Play Online</a>
+    <a href="seven-kingdoms-news.html">News</a>
+    <a href="https://7kfans.com/forums" target="_blank">Forums</a>
+  </div>
+  <p>Originally developed by Trevor Chan at Enlight Software. Now freely available and community-maintained under the GPL. This is an unofficial fan site.</p>
+</footer>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+  /* STARFIELD */
+  const canvas = document.getElementById('stars-canvas');
+  const ctx = canvas.getContext('2d');
+  let stars = [];
+  function resizeCanvas() { canvas.width = window.innerWidth; canvas.height = window.innerHeight; }
+  function initStars() {
+    stars = [];
+    for (let i = 0; i < 160; i++) {
+      stars.push({ x: Math.random()*canvas.width, y: Math.random()*canvas.height,
+        r: Math.random()*1.2+0.2, o: Math.random()*0.6+0.1, speed: Math.random()*0.3+0.05 });
+    }
+  }
+  function drawStars() {
+    ctx.clearRect(0,0,canvas.width,canvas.height);
+    stars.forEach(s => {
+      ctx.beginPath(); ctx.arc(s.x,s.y,s.r,0,Math.PI*2);
+      ctx.fillStyle = `rgba(232,213,176,${s.o})`; ctx.fill();
+      s.o += s.speed*0.02*(Math.random()>0.5?1:-1);
+      s.o = Math.max(0.05,Math.min(0.8,s.o));
+    });
+    requestAnimationFrame(drawStars);
+  }
+  resizeCanvas(); initStars(); drawStars();
+  window.addEventListener('resize',()=>{ resizeCanvas(); initStars(); });
+
+  /* SCROLL REVEAL */
+  const revealEls = document.querySelectorAll('.reveal');
+  const observer = new IntersectionObserver((entries) => {
+    entries.forEach((e, i) => {
+      if (e.isIntersecting) {
+        setTimeout(() => e.target.classList.add('visible'), i * 100);
+        observer.unobserve(e.target);
+      }
+    });
+  }, { threshold: 0.08 });
+  revealEls.forEach(el => observer.observe(el));
+  /* HAMBURGER MENU */
+  const hamburger = document.getElementById('navHamburger');
+  const dropdown = document.getElementById('navDropdown');
+  if (hamburger && dropdown) {
+    hamburger.addEventListener('click', e => { e.stopPropagation(); dropdown.classList.toggle('open'); });
+    document.addEventListener('click', () => dropdown.classList.remove('open'));
+  }
+});
+</script>
+</body>
+</html>

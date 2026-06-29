@@ -1,0 +1,368 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>News — Seven Kingdoms: Ancient Adversaries</title>
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    :root {
+      --midnight: #0A0D1A; --deep-navy: #0F1528; --slate: #1C2035;
+      --smoke: #2A2D3E; --gold: #C9A84C; --gold-light: #E8C96A;
+      --gold-dim: #7A6030; --parchment: #E8D5B0; --parchment-dim: #B8A580; --white: #F5F0E8;
+    }
+    html { scroll-behavior: smooth; }
+    body { background: var(--midnight); color: var(--parchment); font-family: Georgia, 'Times New Roman', serif; font-size: 18px; line-height: 1.7; min-height: 100vh; }
+    #stars-canvas { position: fixed; inset: 0; pointer-events: none; z-index: 0; opacity: 0.4; }
+    nav {
+      position: fixed; top: 0; left: 0; right: 0;
+      z-index: 100;
+      display: flex; align-items: center;
+      justify-content: space-between;
+      padding: 0.6rem 1.2rem;
+      background: rgba(10,13,26,0.97);
+      border-bottom: 1px solid rgba(201,168,76,0.18);
+      backdrop-filter: blur(4px);
+      gap: 0.5rem;
+    }
+    .nav-logo { display: flex; align-items: center; gap: 0.6rem; text-decoration: none; flex-shrink: 0; }
+    .nav-logo-text { display: flex; flex-direction: column; }
+    .nav-logo-text .line1 { font-family: Georgia, 'Times New Roman', serif; font-size: 0.78rem; font-weight: 700; color: var(--gold); letter-spacing: 0.06em; line-height: 1.1; }
+    .nav-logo-text .line3 { font-family: Georgia, 'Times New Roman', serif; font-size: 0.5rem; color: var(--gold); letter-spacing: 0.15em; text-decoration: none; opacity: 0.7; line-height: 1.4; }
+    nav ul { list-style: none; display: none; }
+    .nav-buttons { display: flex; gap: 0.5rem; align-items: center; flex-shrink: 0; margin-left: auto; }
+    nav .cta-nav { font-family: Georgia, 'Times New Roman', serif; font-size: 0.62rem; letter-spacing: 0.1em; text-transform: uppercase; color: var(--midnight); background: var(--gold); padding: 0.45rem 0.8rem; text-decoration: none; transition: background 0.25s; white-space: nowrap; }
+    nav .cta-nav:hover { background: var(--gold-light); }
+    .nav-hamburger { display: flex; background: none; border: 1px solid rgba(201,168,76,0.4); color: var(--gold); font-size: 1.1rem; width: 36px; height: 36px; cursor: pointer; align-items: center; justify-content: center; flex-shrink: 0; }
+    .nav-dropdown { display: none; position: fixed; top: 52px; left: 0; right: 0; background: rgba(10,13,26,0.98); border-bottom: 1px solid rgba(201,168,76,0.2); flex-direction: column; z-index: 99; padding: 0.5rem 0; }
+    .nav-dropdown.open { display: flex; }
+    .nav-dropdown a { font-family: Georgia, 'Times New Roman', serif; font-size: 0.72rem; letter-spacing: 0.18em; text-transform: uppercase; color: var(--parchment-dim); text-decoration: none; padding: 0.9rem 1.5rem; border-bottom: 1px solid rgba(201,168,76,0.08); transition: color 0.2s, background 0.2s; }
+    .nav-dropdown a:hover { color: var(--gold); background: rgba(201,168,76,0.05); }
+    main { position: relative; z-index: 1; max-width: 800px; margin: 0 auto; padding: 8rem 2rem 6rem; }
+    .page-header { text-align: center; margin-bottom: 4rem; }
+    .page-eyebrow { font-family: Georgia, 'Times New Roman', serif; font-size: 0.65rem; letter-spacing: 0.4em; text-transform: uppercase; color: var(--gold-dim); margin-bottom: 0.8rem; }
+    .page-header h1 { font-family: Georgia, 'Times New Roman', serif; font-size: clamp(1.8rem, 5vw, 3rem); color: var(--gold); text-shadow: 0 0 40px rgba(201,168,76,0.3); line-height: 1.2; margin-bottom: 0.8rem; }
+    .page-header p { font-size: 1.05rem; font-style: italic; color: var(--parchment-dim); max-width: 560px; margin: 0 auto; }
+    .section-rule { display: flex; align-items: center; gap: 0.8rem; justify-content: center; margin-top: 1.2rem; }
+    .section-rule::before,.section-rule::after { content:''; width:60px; height:1px; background:var(--gold-dim); }
+    .section-rule .dot { width:5px; height:5px; background:var(--gold); transform:rotate(45deg); }
+    .news-item { border: 1px solid rgba(201,168,76,0.2); background: var(--deep-navy); margin-bottom: 1.5rem; position: relative; overflow: hidden; }
+    .news-item::before { content: ''; position: absolute; top: 0; left: 0; right: 0; height: 2px; background: linear-gradient(to right, transparent, var(--gold), transparent); }
+    .news-head { padding: 1.5rem 2rem 1rem; border-bottom: 1px solid rgba(201,168,76,0.1); }
+    .news-version { display: inline-block; font-family: Georgia, 'Times New Roman', serif; font-size: 1.2rem; font-weight: 600; color: var(--gold); letter-spacing: 0.05em; margin-bottom: 0.3rem; }
+    .news-meta { font-family: Georgia, 'Times New Roman', serif; font-size: 0.58rem; letter-spacing: 0.2em; text-transform: uppercase; color: var(--gold-dim); }
+    .news-body { padding: 1.5rem 2rem; }
+    .news-body p { font-size: 1rem; color: var(--parchment-dim); line-height: 1.8; margin-bottom: 1rem; }
+    .news-body p:last-child { margin-bottom: 0; }
+    .news-links { display: flex; gap: 0.8rem; flex-wrap: wrap; margin-top: 1rem; }
+    .news-btn { font-family: Georgia, 'Times New Roman', serif; font-size: 0.62rem; letter-spacing: 0.12em; text-transform: uppercase; color: var(--gold); border: 1px solid rgba(201,168,76,0.35); padding: 0.5rem 1rem; text-decoration: none; transition: border-color 0.2s, background 0.2s; }
+    .news-btn:hover { border-color: var(--gold); background: rgba(201,168,76,0.08); }
+    .news-btn.primary { background: var(--gold); color: var(--midnight); border-color: var(--gold); }
+    .news-btn.primary:hover { background: var(--gold-light); }
+    .all-news { text-align: center; margin-top: 3rem; }
+    .all-news a { font-family: Georgia, 'Times New Roman', serif; font-size: 0.7rem; letter-spacing: 0.2em; text-transform: uppercase; color: var(--gold-dim); text-decoration: none; transition: color 0.2s; }
+    .all-news a:hover { color: var(--gold); }
+    footer { position: relative; z-index: 1; padding: 2.5rem 2rem; text-align: center; border-top: 1px solid rgba(201,168,76,0.12); }
+    footer p { font-size: 0.85rem; color: var(--gold-dim); font-style: italic; }
+    .footer-links { display:flex; gap:2rem; justify-content:center; margin:1rem 0; flex-wrap:wrap; }
+    .footer-links a { font-family:Georgia,serif; font-size:0.6rem; letter-spacing:0.2em; text-transform:uppercase; color:var(--parchment-dim); text-decoration:none; transition:color 0.2s; }
+    .footer-links a:hover { color:var(--gold); }
+    .reveal { opacity:0; transform:translateY(20px); transition:opacity 0.6s ease, transform 0.6s ease; }
+    .reveal.visible { opacity:1; transform:none; }
+    @media(max-width:600px){ main { padding: 7rem 1.2rem 4rem; } .news-head, .news-body { padding: 1.2rem; } }
+  </style>
+</head>
+<body>
+<canvas id="stars-canvas"></canvas>
+<nav>
+  <a class="nav-logo" href="index.html">
+    <div class="nav-logo-text">
+      <span class="line1">Seven Kingdoms</span>
+      <a href="https://7kfans.com" target="_blank" class="line3">7kfans.com</a>
+    </div>
+  </a>
+  <div class="nav-buttons">
+    <a class="cta-nav" href="seven-kingdoms-download.html">Play Free</a>
+    <button class="nav-hamburger" id="navHamburger" aria-label="Menu">&#9776;</button>
+  </div>
+  <div class="nav-dropdown" id="navDropdown">
+    <a href="seven-kingdoms-community.html">Community</a>
+    <a href="seven-kingdoms-play.html">Play Online</a>
+    <a href="seven-kingdoms-download.html">Download</a>
+    <a href="seven-kingdoms-news.html">News</a>
+    <a href="seven-kingdoms-ambition.html">Ambition</a>
+  </div>
+</nav>
+<main>
+  <div class="page-header reveal">
+    <p class="page-eyebrow">Latest Updates</p>
+    <h1>News</h1>
+    <p>Release announcements and development updates from the Seven Kingdoms community.</p>
+    <div class="section-rule"><div class="dot"></div></div>
+  </div>
+
+  <div class="news-item reveal">
+    <div class="news-head">
+      <span class="news-version">Seven Kingdoms v2.15.7</span>
+      <div class="news-meta">@the3dfxdude · 2025-07-25</div>
+    </div>
+    <div class="news-body">
+      <p>A new release! What's significant here is the ongoing AI work, with many fixes from DieselMachine and Infiltrator. Scenario settings now persist, and the host can propagate those same settings for multiplayer.</p>
+      <p>We are now providing an experimental Linux build that can be downloaded and run locally.</p>
+      <div class="news-links">
+        <a class="news-btn primary" href="seven-kingdoms-download.html">Download</a>
+        <a class="news-btn" href="https://7kfans.com/forums/viewtopic.php?t=1569" target="_blank">Discuss ↗</a>
+      </div>
+    </div>
+  </div>
+
+  <div class="news-item reveal">
+    <div class="news-head">
+      <span class="news-version">Seven Kingdoms v2.15.6</span>
+      <div class="news-meta">@the3dfxdude · 2023-09-02</div>
+    </div>
+    <div class="news-body">
+      <p>A release long in the making, tackling issues with the AI — smarter management, continuing assaults, and actually going on sea-based missions. The AI will no longer be as easily tricked.</p>
+      <p>More quality-of-code improvements and testing to ensure stability. Thanks to all the testers.</p>
+      <div class="news-links">
+        <a class="news-btn primary" href="seven-kingdoms-download.html">Download</a>
+        <a class="news-btn" href="https://7kfans.com/forums/viewtopic.php?f=18&t=1300" target="_blank">Discuss ↗</a>
+      </div>
+    </div>
+  </div>
+
+  <div class="news-item reveal">
+    <div class="news-head">
+      <span class="news-version">Seven Kingdoms v2.15.5</span>
+      <div class="news-meta">@the3dfxdude · 2022-04-28</div>
+    </div>
+    <div class="news-body">
+      <p>New UI features, AI improvements, and bugfixes. One common comment was that the AI wasn't challenging — check out the game and see how the AI plays now.</p>
+      <div class="news-links">
+        <a class="news-btn primary" href="seven-kingdoms-download.html">Download</a>
+        <a class="news-btn" href="https://7kfans.com/forums/viewtopic.php?f=18&t=1240" target="_blank">Discuss ↗</a>
+      </div>
+    </div>
+  </div>
+
+  <div class="news-item reveal">
+    <div class="news-head">
+      <span class="news-version">Seven Kingdoms v2.15.0</span>
+      <div class="news-meta">@the3dfxdude · 2018-09-17</div>
+    </div>
+    <div class="news-body">
+      <p>A major milestone — SDL2, multiplayer match-making, translation support, game recording and replay, enhanced localization, Russian fonts and translation, improved 64-bit support, and a game manual.</p>
+      <div class="news-links">
+        <a class="news-btn primary" href="seven-kingdoms-download.html">Download</a>
+        <a class="news-btn" href="https://www.7kfans.com/forums/viewtopic.php?f=18&t=1067" target="_blank">Discuss ↗</a>
+      </div>
+    </div>
+  </div>
+
+  <div class="news-item reveal">
+    <div class="news-head">
+      <span class="news-version">Ten Year Anniversary</span>
+      <div class="news-meta">@the3dfxdude · 2019-09-03</div>
+    </div>
+    <div class="news-body">
+      <p>It's been a pleasure working with everyone to make this community more vibrant and active. Here's to the 10th year since this project website was created — and to what's in store in the future.</p>
+    </div>
+  </div>
+
+  <div class="news-item reveal">
+    <div class="news-head">
+      <span class="news-version">Source Code Released</span>
+      <div class="news-meta">@jlac1024 · 2009-08-31</div>
+    </div>
+    <div class="news-body">
+      <p>Trevor Chan from Enlight Software released the source code for Seven Kingdoms: Ancient Adversaries to this community project, so we can provide long-awaited bug fixes and address game-play issues. The project that started it all.</p>
+    </div>
+  </div>
+
+
+  <div class="news-item reveal">
+    <div class="news-head">
+      <span class="news-version">Development Update for v2.15.6</span>
+      <div class="news-meta">@the3dfxdude · 2023-09-02</div>
+    </div>
+    <div class="news-body">
+      <p>A development build for testing the latest SDL release, plus many AI enhancements and bugfixes. Development builds are temporary and can only be played in multiplayer with others on the exact same version.</p>
+    </div>
+  </div>
+
+  <div class="news-item reveal">
+    <div class="news-head">
+      <span class="news-version">Website Change Coming</span>
+      <div class="news-meta">@the3dfxdude · 2022-01-20</div>
+    </div>
+    <div class="news-body">
+      <p>A new content management system replaced WordPress and the Wiki. The RSS feed moved to a new URL — readers were asked to update before the old feed was retired.</p>
+    </div>
+  </div>
+
+  <div class="news-item reveal">
+    <div class="news-head">
+      <span class="news-version">Seven Kingdoms v2.15.4</span>
+      <div class="news-meta">@the3dfxdude · 2020-07-04</div>
+    </div>
+    <div class="news-body">
+      <p>Fixed the freeze after long multiplayer games and corrected leader assignment for defending troops — defenders now get an attack bonus with their leader safe in the fort. Also improved the trade report so you can track caravans and set trade routes more easily.</p>
+      <div class="news-links">
+        <a class="news-btn primary" href="seven-kingdoms-download.html">Download</a>
+        <a class="news-btn" href="https://www.7kfans.com/forums/viewtopic.php?f=18&t=1156" target="_blank">Discuss ↗</a>
+      </div>
+    </div>
+  </div>
+
+  <div class="news-item reveal">
+    <div class="news-head">
+      <span class="news-version">Seven Kingdoms v2.15.3</span>
+      <div class="news-meta">@the3dfxdude · 2019-12-22</div>
+    </div>
+    <div class="news-body">
+      <p>Bug fixes, improved multiplayer synchronization, UI fixes, and several advanced config options. Added key binding support, fixed spy-related crashes, and improved translation support.</p>
+      <div class="news-links">
+        <a class="news-btn primary" href="seven-kingdoms-download.html">Download</a>
+        <a class="news-btn" href="https://www.7kfans.com/forums/viewtopic.php?f=18&t=1133" target="_blank">Discuss ↗</a>
+      </div>
+    </div>
+  </div>
+
+  <div class="news-item reveal">
+    <div class="news-head">
+      <span class="news-version">Seven Kingdoms v2.15.2</span>
+      <div class="news-meta">@the3dfxdude · 2019-06-22</div>
+    </div>
+    <div class="news-body">
+      <p>Fixed many crashes and continued UI improvements. Added German, Portuguese and Spanish translations, scenario completion tracking, mouse-wheel map scrolling, and advanced config file support.</p>
+      <div class="news-links">
+        <a class="news-btn primary" href="seven-kingdoms-download.html">Download</a>
+        <a class="news-btn" href="https://7kfans.com/forums/viewtopic.php?f=18&t=1111" target="_blank">Discuss ↗</a>
+      </div>
+    </div>
+  </div>
+
+  <div class="news-item reveal">
+    <div class="news-head">
+      <span class="news-version">Seven Kingdoms v2.15.1</span>
+      <div class="news-meta">@the3dfxdude · 2018-12-28</div>
+    </div>
+    <div class="news-body">
+      <p>Addressed known desync and platform issues for better stability — fixed desyncs on mobilizing workers, troop sorties and AI attack planning, plus improved cross-platform support.</p>
+      <div class="news-links">
+        <a class="news-btn primary" href="seven-kingdoms-download.html">Download</a>
+        <a class="news-btn" href="https://7kfans.com/forums/viewtopic.php?f=18&t=1077" target="_blank">Discuss ↗</a>
+      </div>
+    </div>
+  </div>
+
+  <div class="news-item reveal">
+    <div class="news-head">
+      <span class="news-version">7KAA 2.14.7</span>
+      <div class="news-meta">@the3dfxdude · 2017-06-04</div>
+    </div>
+    <div class="news-body">
+      <p>Added NAT punch-through support for easier, more reliable online play via 7kfans.com. Game-balancing changes made the game more challenging — Fryhtans attack more often, spies are stealthier, and the greater being mana exploit was fixed.</p>
+    </div>
+  </div>
+
+  <div class="news-item reveal">
+    <div class="news-head">
+      <span class="news-version">7KAA 2.14.6</span>
+      <div class="news-meta">@the3dfxdude · 2016-09-04</div>
+    </div>
+    <div class="news-body">
+      <p>Added 7kfans.com match-making and LAN game browsing, similar to the original game's lobby. This 2.14 series became the stable branch for all players. Translation work also began.</p>
+    </div>
+  </div>
+
+  <div class="news-item reveal">
+    <div class="news-head">
+      <span class="news-version">7KAA 2.14.5</span>
+      <div class="news-meta">@the3dfxdude · 2015-05-19</div>
+    </div>
+    <div class="news-body">
+      <p>Perhaps the most extensive set of improvements yet — switched to SDL2 with full-screen stretching, gained macOS support, replaced SDL_net with enet (up to 7 players), and added gettext translation support.</p>
+    </div>
+  </div>
+
+  <div class="news-item reveal">
+    <div class="news-head">
+      <span class="news-version">Seven Kingdoms 2 HD</span>
+      <div class="news-meta">@the3dfxdude · 2015-01-02</div>
+    </div>
+    <div class="news-body">
+      <p>News that Enlight was preparing a Steam release of an updated Seven Kingdoms 2 HD. The community hoped to remain compatible with 7K2HD, noting that 7KAA-OSS remains a complete, successful open-source release.</p>
+    </div>
+  </div>
+
+  <div class="news-item reveal">
+    <div class="news-head">
+      <span class="news-version">7KAA Music Now Available</span>
+      <div class="news-meta">@the3dfxdude · 2011-12-04</div>
+    </div>
+    <div class="news-body">
+      <p>Thanks to Bjorn Lynne's generous offer, the game music became freely available again. Note: the music is not GPL or public domain — it can only be used as intended with the game, and may not be modified or re-recorded.</p>
+    </div>
+  </div>
+
+  <div class="news-item reveal">
+    <div class="news-head">
+      <span class="news-version">7KAA Ported to SDL</span>
+      <div class="news-meta">@the3dfxdude · 2010-07-20</div>
+    </div>
+    <div class="news-body">
+      <p>A new milestone — Seven Kingdoms: AA could now compile for SDL on Linux x86 and Windows, with OpenAL support written by unavowed. The beginning of true cross-platform support.</p>
+    </div>
+  </div>
+
+  <div class="news-item reveal">
+    <div class="news-head">
+      <span class="news-version">Seven Kingdoms II: The Fryhtan Wars</span>
+      <div class="news-meta">@jlac1024 · 2009-09-10</div>
+    </div>
+    <div class="news-body">
+      <p>Trevor Chan agreed to let the project take control of the 7K2 source code, with plans to use the same portable core developed for 7KAA.</p>
+    </div>
+  </div>
+
+  <div class="all-news reveal">
+    <a href="index.html">← Back to Home</a>
+  </div>
+</main>
+
+<footer>
+  <div class="footer-links">
+    <a href="index.html">Home</a>
+    <a href="seven-kingdoms-community.html">Community</a>
+    <a href="seven-kingdoms-download.html">Download</a>
+    <a href="seven-kingdoms-play.html">Play Online</a>
+    <a href="seven-kingdoms-news.html">News</a>
+    <a href="https://7kfans.com/forums" target="_blank">Forums</a>
+  </div>
+  <p>Originally developed by Trevor Chan at Enlight Software. Now freely available and community-maintained under the GPL. This is an unofficial fan site.</p>
+</footer>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+  const canvas = document.getElementById('stars-canvas');
+  const ctx = canvas.getContext('2d');
+  let stars = [];
+  function resizeCanvas() { canvas.width = window.innerWidth; canvas.height = window.innerHeight; }
+  function initStars() { stars = []; for (let i = 0; i < 160; i++) { stars.push({ x: Math.random()*canvas.width, y: Math.random()*canvas.height, r: Math.random()*1.2+0.2, o: Math.random()*0.6+0.1, speed: Math.random()*0.3+0.05 }); } }
+  function drawStars() { ctx.clearRect(0,0,canvas.width,canvas.height); stars.forEach(s => { ctx.beginPath(); ctx.arc(s.x,s.y,s.r,0,Math.PI*2); ctx.fillStyle=`rgba(232,213,176,${s.o})`; ctx.fill(); s.o+=s.speed*0.02*(Math.random()>0.5?1:-1); s.o=Math.max(0.05,Math.min(0.8,s.o)); }); requestAnimationFrame(drawStars); }
+  resizeCanvas(); initStars(); drawStars();
+  window.addEventListener('resize',()=>{ resizeCanvas(); initStars(); });
+  const obs = new IntersectionObserver((entries) => { entries.forEach((e,i) => { if(e.isIntersecting){ setTimeout(()=>e.target.classList.add('visible'),i*100); obs.unobserve(e.target); } }); }, {threshold:0.08});
+  document.querySelectorAll('.reveal').forEach(el => obs.observe(el));
+  /* HAMBURGER MENU */
+  const hamburger = document.getElementById('navHamburger');
+  const dropdown = document.getElementById('navDropdown');
+  if (hamburger && dropdown) {
+    hamburger.addEventListener('click', e => { e.stopPropagation(); dropdown.classList.toggle('open'); });
+    document.addEventListener('click', () => dropdown.classList.remove('open'));
+  }
+});
+</script>
+</body>
+</html>
