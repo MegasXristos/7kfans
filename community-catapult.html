@@ -71,8 +71,8 @@
     .info-label { font-family: Georgia, 'Times New Roman', serif; font-size: 0.58rem; letter-spacing: 0.25em; text-transform: uppercase; color: var(--gold-dim); margin-bottom: 0.3rem; }
     .info-value { font-size: 0.95rem; color: var(--parchment); }
     .check-list { list-style: none; padding: 0; display: flex; flex-direction: column; gap: 0.5rem; }
-    .check-list li { display: flex; gap: 0.8rem; align-items: flex-start; font-size: 0.95rem; color: var(--parchment-dim); line-height: 1.6; }
-    .check-list li::before { content: '✦'; color: var(--gold); font-size: 0.6rem; margin-top: 0.35rem; flex-shrink: 0; }
+    .check-list li { position: relative; padding-left: 1.4rem; font-size: 0.95rem; color: var(--parchment-dim); line-height: 1.6; }
+    .check-list li::before { content: '✦'; color: var(--gold); font-size: 0.6rem; position: absolute; left: 0; top: 0.35rem; }
     .cross-list li::before { content: '✕'; color: #B52A2A; }
     .btn-outline { display: inline-flex; align-items: center; gap: 0.6rem; font-family: Georgia, 'Times New Roman', serif; font-size: 0.72rem; letter-spacing: 0.15em; text-transform: uppercase; color: var(--gold); background: transparent; padding: 0.9rem 1.8rem; text-decoration: none; border: 1px solid rgba(201,168,76,0.4); transition: border-color 0.2s, background 0.2s; }
     .btn-outline:hover { border-color: var(--gold); background: rgba(201,168,76,0.07); }
@@ -185,7 +185,7 @@
     <a href="seven-kingdoms-news.html">News</a>
     <a href="https://7kfans.com/forums" target="_blank">Forums</a>
   </div>
-  <p>Originally developed by Trevor Chan at Enlight Software. Now freely available and community-maintained under the GPL. This is an unofficial fan site.</p>
+  <p>Seven Kingdoms Ancient Adversaries (c) Enlight Software and the 7kfans Project, and licensed under the GPL. Seven Kingdoms is a trademark of Enlight Software and used by permission by the 7kfans Project website and published releases. Use of the trademark is not granted to any other open source project.</p>
 </footer>
 <script>
 document.addEventListener('DOMContentLoaded', function() {
